@@ -1,78 +1,19 @@
-const apiKey = "12e66aee9a7b5c3141fc50e34412d03b"; // <--- APNI KEY YAHAN PASTE KAREIN
-
-async function getWeatherData(city) {
-    try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
-        const data = await response.json();
-        
-        if(data.cod === "404") return alert("City not found");
-
-        updateMainUI(data);
-        getForecast(data.coord.lat, data.coord.lon);
-        updateBackground(data.weather[0].main);
-    } catch (err) { console.error(err); }
+const cfg={key:'12e66aee9a7b5c3141fc50e34412d03b',delay:250};
+const el={load:document.getElementById('loading'),err:document.getElementById('error'),inp:document.getElementById('cityInput'),btn:document.getElementById('searchBtn'),cur:document.getElementById('current'),fore:document.getElementById('forecast')};
+let t;
+el.inp.value=localStorage.getItem('city')||'';
+el.btn.onclick=go;
+el.inp.oninput=()=>{clearTimeout(t);t=setTimeout(go,cfg.delay);};
+function go(){const v=el.inp.value.trim();if(v){localStorage.setItem('city',v);fetchData(v);}}
+async function fetchData(city){
+ui(true); clearError();
+try{
+const [a,b]=await Promise.all([fetchJSON('weather',city),fetchJSON('forecast',city)]);
+ui(false); show(a,b);
+}catch(e){ui(false); showErr(e.message);}
 }
-
-function updateMainUI(data) {
-    document.getElementById("cityName").innerText = data.name;
-    document.getElementById("mainTemp").innerText = Math.round(data.main.temp);
-    document.getElementById("mainDesc").innerText = data.weather[0].description;
-    document.getElementById("humidity").innerText = data.main.humidity + "%";
-    document.getElementById("windSpeed").innerText = data.wind.speed + " km/h";
-    document.getElementById("mainIcon").src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
-    
-    const now = new Date();
-    document.getElementById("currentDate").innerText = now.toLocaleDateString('en-US', {weekday: 'long', day: 'numeric', month: 'short'});
-}
-
-async function getForecast(lat, lon) {
-    const res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
-    const data = await res.json();
-    
-    const container = document.getElementById("forecastContainer");
-    container.innerHTML = "";
-
-    for(let i = 0; i < data.list.length; i += 8) {
-        const day = data.list[i];
-        const dayName = new Date(day.dt_txt).toLocaleDateString('en', {weekday: 'short'});
-        container.innerHTML += `
-            <div class="forecast-item">
-                <p>${dayName}</p>
-                <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png">
-                <p>${Math.round(day.main.temp)}°</p>
-            </div>
-        `;
-    }
-}
-
-function updateBackground(condition) {
-    const body = document.body;
-    let imgUrl = "";
-    
-    if(condition.includes("Cloud")) imgUrl = "https://images.unsplash.com/photo-1534088568595-a066f7104211?q=80&w=1000";
-    else if(condition.includes("Rain")) imgUrl = "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=1000";
-    else if(condition.includes("Clear")) imgUrl = "https://images.unsplash.com/photo-1506224477000-07aa8a76be90?q=80&w=1000";
-    else imgUrl = "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1000";
-    
-    body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${imgUrl}')`;
-}
-
-// Event Listeners
-document.getElementById("searchBtn")?.addEventListener("click", () => getWeatherData(document.getElementById("cityInput").value));
-
-// Enter key support
-document.getElementById("cityInput").addEventListener("keypress", (e) => {
-    if(e.key === "Enter") getWeatherData(e.target.value);
-});
-
-// Auto-Location on Start
-window.onload = () => {
-    navigator.geolocation.getCurrentPosition(pos => {
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&units=metric&appid=${apiKey}`)
-        .then(r => r.json()).then(d => {
-            updateMainUI(d);
-            getForecast(d.coord.lat, d.coord.lon);
-            updateBackground(d.weather[0].main);
-        });
-    }, () => getWeatherData("Islamabad"));
-};
+function fetchJSON(type,city){return fetch(`https://api.openweathermap.org/data/2.5/${type}?q=${city}&appid=${cfg.key}&units=metric`).then(r=>{if(!r.ok) throw new Error('City not found');return r.json();});}
+function show(c,f){el.cur.innerHTML=`<h2>${c.name}</h2><p>${c.main.temp}°C ${c.weather[0].description}</p>`;el.fore.innerHTML=f.list.slice(0,8).map(i=>`<div>${new Date(i.dt*1000).getHours()}h ${i.main.temp}°C</div>`).join('');}
+function ui(on){el.load.classList.toggle('hidden',!on);}
+function showErr(m){el.err.textContent=m;el.err.classList.remove('hidden');}
+function clearError(){el.err.textContent='';el.err.classList.add('hidden');}
