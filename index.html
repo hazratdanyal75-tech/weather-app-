@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast Pro | Ultimate Weather</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="cityInput" placeholder="Search city..." spellcheck="false">
+            </div>
+            <button id="locationBtn"><i class="fa-solid fa-location-arrow"></i></button>
+        </header>
+
+        <main class="main-display">
+            <div class="location-info">
+                <h1 id="cityName">--</h1>
+                <p id="currentDate">--</p>
+            </div>
+            
+            <div class="weather-hero">
+                <img src="" id="mainIcon" class="floating">
+                <div class="temp-container">
+                    <span id="mainTemp">--</span><span class="unit">°C</span>
+                </div>
+                <h2 id="mainDesc">--</h2>
+            </div>
+        </main>
+
+        <div class="insights-grid">
+            <div class="insight-card">
+                <i class="fa-solid fa-wind"></i>
+                <div class="data">
+                    <p id="windSpeed">--</p>
+                    <span>Wind</span>
+                </div>
+            </div>
+            <div class="insight-card">
+                <i class="fa-solid fa-droplet"></i>
+                <div class="data">
+                    <p id="humidity">--</p>
+                    <span>Humidity</span>
+                </div>
+            </div>
+            <div class="insight-card">
+                <i class="fa-solid fa-mask-face"></i>
+                <div class="data">
+                    <p id="aqi">--</p>
+                    <span>AQI Level</span>
+                </div>
+            </div>
+            <div class="insight-card">
+                <i class="fa-solid fa-sun"></i>
+                <div class="data">
+                    <p id="uvIndex">Low</p>
+                    <span>UV Index</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="forecast-section">
+            <h3>5-Day Forecast</h3>
+            <div id="forecastContainer" class="forecast-row">
+                </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
